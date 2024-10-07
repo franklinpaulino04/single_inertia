@@ -23,11 +23,11 @@ export const useUserComposable = () => {
     } = storeToRefs(userStore);
 
     const getAllUsers = async () => {
+        userStore.setLoading(true);
+        userStore.setUsers([]);
         try {
-            userStore.setLoading(true);
-            userStore.setUsers([]);
-            const response = await UserService.getAll();
-            userStore.setUsers(response.data.users);
+            const { data } = await UserService.getAll();
+            userStore.setUsers(data.users);
             userStore.setLoading(false);
         }catch (e) {
             console.error(e);
@@ -35,10 +35,10 @@ export const useUserComposable = () => {
     }
 
     const getUserById = async (id) => {
+        userStore.setUser(null);
         try {
-            userStore.setUser({});
-            const response = await UserService.get(id);
-            userStore.setUser(response.data.user);
+            const { data } = await UserService.get(id);
+            userStore.setUser(data.user);
         }catch (e) {
             console.error(e);
         }
@@ -46,49 +46,37 @@ export const useUserComposable = () => {
 
     const createUser = async (payload, actions) => {
         try {
-
-            const response = await UserService.create(payload);
-
-            if(response.data?.success){
-                await getAllUsers();
-                userStore.setTriggerAddModal()
-                alert('User created successfully');
-            }
-
+            await UserService.create(payload);
+            await getAllUsers();
+            userStore.setTriggerAddModal()
+            alert('User created successfully');
         }catch (e) {
             if(e.response.data.errors){
                 actions.setErrors(e.response.data.errors);
             }
+            console.error(e);
         }
     }
 
     const updateUser = async (payload, actions) => {
         try {
-
-            const response = await UserService.update(user.value.id, payload);
-
-            if(response.data?.success){
-                await getAllUsers();
-                userStore.setTriggerEditModal();
-                alert('User updated successfully');
-            }
-
+            await UserService.update(user.value.id, payload);
+            await getAllUsers();
+            userStore.setTriggerEditModal();
+            alert('User updated successfully');
         }catch (e) {
             if(e.response.data.errors){
                 actions.setErrors(e.response.data.errors);
             }
+            console.error(e);
         }
     }
 
     const deleteUser = async (id) => {
         try {
-            const response = await UserService.delete(id);
+            await UserService.delete(id);
             await getAllUsers();
-
-            if (response.data?.success) {
-                alert('User deleted successfully');
-            }
-
+            alert('User deleted successfully');
         }catch (e) {
             console.error(e);
         }

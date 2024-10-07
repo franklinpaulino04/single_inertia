@@ -4,7 +4,7 @@ export const useUserStore = defineStore('user',{
     state: () => ({
         menuUser: null,
         users: [],
-        user: {},
+        user: null,
         filters: null,
         loading: true,
         triggerAdd: false,
